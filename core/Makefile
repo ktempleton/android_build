@@ -651,9 +651,7 @@ ifneq ($(BOARD_FORCE_RAMDISK_ADDRESS),)
   INTERNAL_RECOVERYIMAGE_ARGS += --ramdiskaddr $(BOARD_FORCE_RAMDISK_ADDRESS)
 endif
 INTERNAL_RECOVERY_FILES := $(filter $(TARGET_RECOVERY_OUT)/%, \
-	$(ALL_PREBUILT) \
-	$(ALL_COPIED_HEADERS) \
-	$(ALL_GENERATED_SOURCES) \
+	$(foreach module, $(ALL_MODULES), $(ALL_MODULES.$(module).INSTALLED)) \
 	$(ALL_DEFAULT_INSTALLED_MODULES))
 
 # Keys authorized to sign OTA packages this build will accept.  The
@@ -685,15 +683,15 @@ $(TARGET_RECOVERY_ROOT_TIMESTAMP): $(INTERNAL_RECOVERY_FILES) \
 		$(recovery_build_prop) $(recovery_resource_deps) \
 		$(recovery_fstab) \
 		$(RECOVERY_INSTALL_OTA_KEYS)
-	@echo ----- Making recovery filesystem ------
+	@echo "----- Making recovery filesystem ------"
 	mkdir -p $(TARGET_RECOVERY_OUT)
 	mkdir -p $(TARGET_RECOVERY_ROOT_OUT)
 	mkdir -p $(TARGET_RECOVERY_ROOT_OUT)/etc
 	mkdir -p $(TARGET_RECOVERY_ROOT_OUT)/tmp
-	echo Copying baseline ramdisk...
+	@echo Copying baseline ramdisk...
 	cp -R $(TARGET_ROOT_OUT) $(TARGET_RECOVERY_OUT)
 	rm $(TARGET_RECOVERY_ROOT_OUT)/init*.rc
-	echo Modifying ramdisk contents...
+	@echo Modifying ramdisk contents...
 	cp -f $(recovery_initrc) $(TARGET_RECOVERY_ROOT_OUT)/init.rc
 	cp -f $(recovery_binary) $(TARGET_RECOVERY_ROOT_OUT)/sbin/
 	rm -f $(TARGET_RECOVERY_ROOT_OUT)/init.*.rc
@@ -708,7 +706,9 @@ $(TARGET_RECOVERY_ROOT_TIMESTAMP): $(INTERNAL_RECOVERY_FILES) \
 	cp $(RECOVERY_INSTALL_OTA_KEYS) $(TARGET_RECOVERY_ROOT_OUT)/res/keys
 	cat $(INSTALLED_DEFAULT_PROP_TARGET) $(recovery_build_prop) \
 	        > $(TARGET_RECOVERY_ROOT_OUT)/default.prop
-	@echo ----- Made recovery filesystem -------- $(TARGET_RECOVERY_ROOT_OUT)
+	@echo Modifying default.prop
+	sed -i 's/ro.build.date.utc=.*/ro.build.date.utc=0/g' $(TARGET_RECOVERY_ROOT_OUT)/default.prop
+	@echo "----- Made recovery filesystem --------" $(TARGET_RECOVERY_ROOT_OUT)
 	@touch $(TARGET_RECOVERY_ROOT_TIMESTAMP)
 
 $(recovery_uncompressed_ramdisk): $(MINIGZIP) \
