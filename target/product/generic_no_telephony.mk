@@ -26,6 +26,7 @@ PRODUCT_PACKAGES := \
     Calculator \
     Calendar \
     CertInstaller \
+    CMFileManager \
     DrmProvider \
     Email \
     Exchange2 \
@@ -34,6 +35,7 @@ PRODUCT_PACKAGES := \
     LatinIME \
     Launcher2 \
     MusicFX \
+    ParanoidWallpapers \
     Provision \
     Phone \
     Settings \
